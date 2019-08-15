@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - "./mysql/:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    restart: always
+
+  php72:
+    image: php:7.2-fpm-alpine
+    volumes:
+      - "./index.php:/var/www/html/index.php"
+    depends_on:
+      - mysql
+    restart: always
+
+  php55:
+    image: php:5.5-fpm-alpine
+    volumes:
+      - "./index.php:/var/www/html/index.php"
+    depends_on:
+      - mysql
+    restart: always
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "50000:50000"
+      - "50100:50100"
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+      - "./index.php:/var/www/html/index.php"
+    depends_on:
+      - php72
+      - php55
+    restart: always
+
